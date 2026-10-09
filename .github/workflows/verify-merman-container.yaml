@@ -19,10 +19,8 @@ jobs:
         run: python3 -m pip install PyYAML
       - name: Validate enrollment
         run: python3 tools/validate.py
-      - name: Clone scanner input
-        run: git clone --depth 1 --branch main https://github.com/Latias94/merman.git /tmp/merman-scanner-input
-      - name: Build scan environment and run bundled tests
-        run: docker build --progress=plain -t merman-oss-scanner -f projects/merman/Dockerfile /tmp/merman-scanner-input
+      - name: Build using the official scanner check
+        run: python3 tools/check merman --no-shell
       - name: Verify tests with networking disabled
         run: |
-          docker run --rm --network none merman-oss-scanner sh -c 'cargo nextest run --offline --locked -p merman -p merman-core -p merman-render -p merman-export -p merman-ffi -p tree-sitter-mermaid --features "$MERMAN_SCAN_FEATURES" -E "test(security) | test(sanitiz) | test(resource) | test(icon_registry) | package(tree-sitter-mermaid)"'
+          docker run --rm --network none oss-scanner-check/built:merman sh -c 'cargo nextest run --offline --locked -p merman -p merman-core -p merman-render -p merman-export -p merman-ffi -p tree-sitter-mermaid --features "$MERMAN_SCAN_FEATURES" -E "test(security) | test(sanitiz) | test(resource) | test(icon_registry) | package(tree-sitter-mermaid)"'
